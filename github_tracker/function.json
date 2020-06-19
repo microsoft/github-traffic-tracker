@@ -1,0 +1,11 @@
+{
+  "scriptFile": "traffic_tracker.py",
+  "bindings": [
+    {
+      "name": "mytimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 0 1 * * *"
+    }
+  ]
+}

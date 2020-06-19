@@ -1,0 +1,5 @@
+azure-functions
+azure-keyvault-secrets
+azure-identity
+requests
+azure-cosmos
