@@ -8,11 +8,18 @@ import uuid
 import azure.functions as func
 from azure.cosmos import CosmosClient
 
-client = CosmosClient.from_connection_string(
-    os.getenv("CosmosDBConnectionString")
-)
-database = client.get_database_client("<YOUR-DATABASE-NAME>")
-container_client = database.get_container_client("<YOUR-CONTAINER-NAME>")
+
+class Database:
+    def __init__(self, connection_string, database_name, container_name):
+        self._client = CosmosClient.from_connection_string(connection_string)
+        self._database = self._client.get_database_client(database_name)
+        self._container_client = self._database.get_container_client(
+                                 container_name
+                                 )
+
+    def upload(self, data):
+        self._container_client.upsert_item(data)
+
 
 owner = "<USER-OR-ORG-OWNER>"
 
@@ -137,7 +144,11 @@ def main(mytimer: func.TimerRequest):
         logging.info("The timer is past due!")
 
     logging.info("Python timer trigger function ran at %s", utc_timestamp)
-
+    cosmos_db = Database(
+                os.getenv("CosmosDBConnectionString"),
+                "<YOUR-DATABASE-NAME>",
+                "<YOUR-CONTAINER-NAME>"
+                )
     for name, url in repos.items():
         raw_views = get_data(url, traffic_views)
         views = validate_date(raw_views, "views")
@@ -151,4 +162,4 @@ def main(mytimer: func.TimerRequest):
             get_yesterdays_date(), name, total_clones, views, graphql_query
         )
 
-        container_client.upsert_item(output)
+        cosmos_db.upload(output)
