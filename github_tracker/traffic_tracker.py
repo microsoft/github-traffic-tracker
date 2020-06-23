@@ -21,13 +21,116 @@ class Database:
         self._container_client.upsert_item(data)
 
 
-owner = "<USER-OR-ORG-OWNER>"
+class Repo:
+    _api_url_base = "https://api.github.com"
+    _v4 = "/graphql"
 
-api_token = os.getenv("GithubApiKey")
-headers = {"Authorization": "Bearer {}".format(api_token)}
-api_url_base = "https://api.github.com"
-v4 = "/graphql"
-v3 = "/repos/{}/".format(owner)
+    def __init__(self, owner, name, url, api_token):
+        self._owner = owner
+        self._name = name
+        self._url = url
+        self._headers = {"Authorization": "Bearer {}".format(api_token)}
+        self._v3 = "/repos/{}/".format(owner)
+
+    def metrics(self):
+        metrics = self._build_output(get_yesterdays_date(),
+                                     self._name,
+                                     self._clones(),
+                                     self._views(),
+                                     self._query()
+                                     )
+        return metrics
+
+    def _get_data(self, url, metric):
+        response = requests.get(self._api_url_base + self._v3 + url + metric,
+                                headers=self._headers)
+        if response.status_code == 200:
+            return json.loads(response.content.decode("utf-8"))
+
+        else:
+            logging.info(response.status_code)
+
+    def _validate_date(self, data, metric):
+        target_date = get_yesterdays_date()
+
+        for key in data[metric]:
+            date = key["timestamp"][:10]
+            if date == target_date:
+                return key
+            else:
+                data = {"timestamp": target_date, "count": 0, "uniques": 0}
+        return data
+
+    def _views(self):
+        _raw_views = self._get_data(self._url, '/traffic/views')
+        _views = self._validate_date(_raw_views, 'views')
+        return _views
+
+    def _clones(self):
+        _raw_clones = self._get_data(self._url, '/traffic/clones')
+        _clones = self._validate_date(_raw_clones, 'clones')
+        return _clones
+
+    def _v4_query(self):
+        repository = '{repository(name: "' + self._url + '", owner: "' + self._owner + '")'
+        metrics = "{ \
+            forks { \
+                totalCount \
+            }\
+            watchers {\
+                totalCount\
+            }\
+            stargazers {\
+                totalCount\
+            }\
+            pullRequests{\
+                totalCount\
+            }\
+        }\
+        }"
+        query = repository + metrics
+        return query
+
+    def _query(self):
+        response = requests.post(
+            self._api_url_base + self._v4,
+            headers=self._headers,
+            json={"query": self._v4_query()}
+        )
+        if response.status_code == 200:
+            return json.loads(response.content.decode("utf-8"))
+        else:
+            logging.info(response.status_code)
+
+    def _build_output(self, date, repo, clones, views, query):
+        output_doc = {}
+        filtered_query = query["data"]["repository"]
+        output_doc = {
+            "id": str(uuid.uuid4()),
+            "category": "GitHub Repo",
+            "date": date,
+            "repo": repo,
+            "metrics": {
+                "views": {
+                    "count": "{}".format(views["count"]),
+                    "unique": "{}".format(views["uniques"]),
+                },
+                "clones": {
+                    "count": "{}".format(clones["count"]),
+                    "unique": "{}".format(clones["uniques"]),
+                },
+                "forks": "{}".format(filtered_query["forks"]
+                                                   ["totalCount"]),
+                "watchers": "{}".format(filtered_query["watchers"]
+                                                      ["totalCount"]),
+                "stars": "{}".format(filtered_query["stargazers"]
+                                                   ["totalCount"]),
+                "pull requests": "{}".format(filtered_query["pullRequests"]
+                                                           ["totalCount"])
+            },
+        }
+
+        return output_doc
 
 
 # Repos to collect metrics from.
@@ -37,100 +140,11 @@ repos = {
     "<REPO-NAME>": "<REPO-URL-EXTENSION>",
 }
 
-# REST api (v3) metrics
-traffic_views = "/traffic/views"
-clones = "/traffic/clones"
-
-
-# GaphQL api (v4) query
-def build_query(repo):
-    repository = '{repository(name: "' + repo + '", owner: "' + owner + '")'
-    metrics = "{ \
-        forks { \
-            totalCount \
-        }\
-        watchers {\
-            totalCount\
-        }\
-        stargazers {\
-            totalCount\
-        }\
-        pullRequests{\
-            totalCount\
-        }\
-    }\
-    }"
-    query = repository + metrics
-    return query
-
-
-def get_data(repo, metric):
-    response = requests.get(api_url_base + v3 + repo + metric, headers=headers)
-    if response.status_code == 200:
-        return json.loads(response.content.decode("utf-8"))
-
-    else:
-        logging.info(response.status_code)
-
-
-def parse_data(data, metric):
-    parsed_data = data[metric][-1]
-    return parsed_data
-
 
 def get_yesterdays_date():
     today = datetime.date.today()
     yesterdays_date = str(today - datetime.timedelta(days=1))
     return yesterdays_date
-
-
-def validate_date(data, metric):
-    target_date = get_yesterdays_date()
-
-    for key in data[metric]:
-        date = key["timestamp"][:10]
-        if date == target_date:
-            return key
-        else:
-            # TODO: Abstact this to make more general
-            data = {"timestamp": target_date, "count": 0, "uniques": 0}
-    return data
-
-
-def post_query(query):
-    response = requests.post(
-        api_url_base + v4, headers=headers, json={"query": query}
-    )
-    if response.status_code == 200:
-        return json.loads(response.content.decode("utf-8"))
-    else:
-        logging.info(response.status_code)
-
-
-def build_output(date, repo, clones, views, query):
-    output_doc = {}
-    output_doc = {
-        "id": str(uuid.uuid4()),
-        "category": "GitHub Repo",
-        "date": date,
-        "repo": repo,
-        "metrics": {
-            "views": {
-                "count": "{}".format(views["count"]),
-                "unique": "{}".format(views["uniques"]),
-            },
-            "clones": {
-                "count": "{}".format(clones["count"]),
-                "unique": "{}".format(clones["uniques"]),
-            },
-            "forks": "{}".format(query["forks"]["totalCount"]),
-            "watchers": "{}".format(query["watchers"]["totalCount"]),
-            "stars": "{}".format(query["stargazers"]["totalCount"]),
-            "pull requests": "{}".format(query["pullRequests"]["totalCount"])
-        },
-    }
-
-    return output_doc
 
 
 def main(mytimer: func.TimerRequest):
@@ -149,17 +163,9 @@ def main(mytimer: func.TimerRequest):
                 "<YOUR-DATABASE-NAME>",
                 "<YOUR-CONTAINER-NAME>"
                 )
+
     for name, url in repos.items():
-        raw_views = get_data(url, traffic_views)
-        views = validate_date(raw_views, "views")
-
-        raw_clones = get_data(url, clones)
-        total_clones = validate_date(raw_clones, "clones")
-
-        graphql_query = post_query(build_query(url))["data"]["repository"]
-
-        output = build_output(
-            get_yesterdays_date(), name, total_clones, views, graphql_query
-        )
-
+        repo = Repo("<USER-OR-ORG-OWNER>", name, url, os.getenv("GithubApiKey"))
+        output = repo.metrics()
         cosmos_db.upload(output)
+        del repo
