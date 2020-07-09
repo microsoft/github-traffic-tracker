@@ -11,10 +11,10 @@ from azure.cosmos import CosmosClient
 client = CosmosClient.from_connection_string(
     os.getenv("CosmosDBConnectionString")
 )
-database = client.get_database_client("<YOUR-DATABASE-NAME>")
-container_client = database.get_container_client("<YOUR-CONTAINER-NAME>")
+database = client.get_database_client("github-tnt-data")
+container_client = database.get_container_client("GitHubTraffic")
 
-owner = "<USER-OR-ORG-OWNER>"
+owner = "tnt-summer-academy"
 
 api_token = os.getenv("GithubApiKey")
 headers = {"Authorization": "Bearer {}".format(api_token)}
@@ -27,7 +27,7 @@ v3 = "/repos/{}/".format(owner)
 # The first variable is a human readabl name, the second needs to match the url
 # for the repo exactly.
 repos = {
-    "<REPO-NAME>": "<REPO-URL-EXTENSION>",
+    "Curriculum": "Curriculum",
 }
 
 # REST api (v3) metrics
