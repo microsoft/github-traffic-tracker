@@ -1,5 +1,5 @@
 {
-  "scriptFile": "traffic_tracker.py",
+  "scriptFile": "__init__.py",
   "bindings": [
     {
       "name": "mytimer",
