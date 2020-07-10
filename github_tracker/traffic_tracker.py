@@ -9,14 +9,14 @@ from azure.cosmos import CosmosClient
 
 
 class Database:
-    ''' Classs used to handle Cosmos DB
+    ''' Class used to handle Cosmos DB
     ...
 
     Attributes
     ----------
     connection_string : str
         connection string from Azure to authenticate connection to CosmosDB.
-        This should be set as an enviroment variable.
+        This should be set as an environment variable.
     database_name : str
         database name in Azure
     container_name : str
@@ -48,7 +48,7 @@ class Database:
 
 
 class Repo:
-    ''' This class represnted the repo/metrics
+    ''' This class represents the repo/metrics
     ...
 
     Attributes
@@ -56,7 +56,7 @@ class Repo:
     owner : str
         owner of the repository, can be either a user or an organization
     name : str
-        name of the reposistory, this doesn't have to match GitHub
+        name of the repository, this doesn't have to match GitHub
     url : str
         the GitHub URL extension for the repository
     api_token:
@@ -70,15 +70,15 @@ class Repo:
         Returns a dict of the views, clones, watchers, stars, forks, and pull
         requests for the repository
     '''
-    __API_URL_BASE = "https://api.github.com"
-    __V4 = "/graphql"
+    _API_URL_BASE = "https://api.github.com"
+    _V4 = "/graphql"
 
     def __init__(self, owner, name, url, api_token):
-        self.__owner = owner
-        self.__name = name
-        self.__url = url
-        self.__headers = {"Authorization": "Bearer {}".format(api_token)}
-        self.__v3 = "/repos/{}/".format(owner)
+        self._owner = owner
+        self._name = name
+        self._url = url
+        self._headers = {"Authorization": "Bearer {}".format(api_token)}
+        self._v3 = "/repos/{}/".format(owner)
 
     def metrics(self):
         ''' Returns a dict of metrics from repository
@@ -86,7 +86,7 @@ class Repo:
         Returns
         -------
         dict
-            a dict of the follwoing metric from GitHub repository:
+            a dict of the following metric from GitHub repository:
             - UUID
             - date
             - repo name
@@ -97,29 +97,29 @@ class Repo:
             - forks
             - pull requests
         '''
-        metrics = self.__build_output(get_yesterdays_date(),
-                                      self.__name,
-                                      self.__clones(),
-                                      self.__views(),
-                                      self.__query()
-                                      )
+        metrics = self._build_output(get_yesterdays_date(),
+                                     self._name,
+                                     self._clones(),
+                                     self._views(),
+                                     self._query()
+                                     )
         return metrics
 
-    def __get_data(self, url, metric):
+    def _get_data(self, url, metric):
         # returns json from the GitHub API
-        response = requests.get(self.__API_URL_BASE + self.__v3 + url + metric,
-                                headers=self.__headers)
+        response = requests.get(self._API_URL_BASE + self._v3 + url + metric,
+                                headers=self._headers)
         if response.status_code == 200:
             return json.loads(response.content.decode("utf-8"))
 
-        else:
+        elif response.status_code == 404 or 403 or 400:
             logging.info("GitHub failed to connect, check that the owner and repo url are set correctly")
-            logging.error("GitHub connection error " +
-                          str(response.status_code))
+            logging.warning("GitHub connection error " +
+                            str(response.status_code))
 
-    def __validate_date(self, data, metric):
+    def _validate_date(self, data, metric):
         # returns data entry for target date only
-        # if no data is avialble for taget date returns 0 in all fields
+        # if no data is available for target date returns 0 in all fields
         target_date = get_yesterdays_date()
 
         for key in data[metric]:
@@ -130,22 +130,22 @@ class Repo:
                 data = {"timestamp": target_date, "count": 0, "uniques": 0}
         return data
 
-    def __views(self):
+    def _views(self):
         # returns total views and unique views for target date
-        raw_views = self.__get_data(self.__url, '/traffic/views')
-        __views = self.__validate_date(raw_views, 'views')
-        return __views
+        raw_views = self._get_data(self._url, '/traffic/views')
+        views = self._validate_date(raw_views, 'views')
+        return views
 
-    def __clones(self):
+    def _clones(self):
         # returns total clones and unique clones for target date
-        raw_clones = self.__get_data(self.__url, '/traffic/clones')
-        __clones = self.__validate_date(raw_clones, 'clones')
-        return __clones
+        raw_clones = self._get_data(self._url, '/traffic/clones')
+        clones = self._validate_date(raw_clones, 'clones')
+        return clones
 
-    def __v4_query(self):
+    def _v4_query(self):
         # returns formed GraphQL query
-        repository = '{repository(name: "' + self.__url + \
-                     '", owner: "' + self.__owner + '")'
+        repository = '{repository(name: "' + self._url + \
+                     '", owner: "' + self._owner + '")'
         metrics = "{ \
             forks { \
                 totalCount \
@@ -164,19 +164,19 @@ class Repo:
         query = repository + metrics
         return query
 
-    def __query(self):
+    def _query(self):
         # returns dict with total forks, watchers, stars, and pull requests
         response = requests.post(
-            self.__API_URL_BASE + self.__V4,
-            headers=self.__headers,
-            json={"query": self.__v4_query()}
+            self._API_URL_BASE + self._V4,
+            headers=self._headers,
+            json={"query": self._v4_query()}
         )
         if response.status_code == 200:
             return json.loads(response.content.decode("utf-8"))
         else:
             logging.info(response.status_code)
 
-    def __build_output(self, date, repo, clones, views, query):
+    def _build_output(self, date, repo, clones, views, query):
         # returns formed output dict
         output_doc = {}
         filtered_query = query["data"]["repository"]
