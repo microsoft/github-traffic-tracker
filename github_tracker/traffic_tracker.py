@@ -2,7 +2,6 @@ import datetime
 import logging
 import json
 import requests
-import os
 import uuid
 
 import azure.functions as func
@@ -22,8 +21,6 @@ class Database:
         database name in Azure
     container_name : str
         name of container within the database
-    data : dict
-        JSON formated data
 
     Methods
     -------
@@ -116,11 +113,13 @@ class Repo:
             return json.loads(response.content.decode("utf-8"))
 
         else:
-            logging.info(response.status_code)
+            logging.info("GitHub failed to connect, check that the owner and repo url are set correctly")
+            logging.error("GitHub connection error " +
+                          str(response.status_code))
 
     def __validate_date(self, data, metric):
         # returns data entry for target date only
-        # if no data is avialble for taget date returns 0 in all fileds
+        # if no data is avialble for taget date returns 0 in all fields
         target_date = get_yesterdays_date()
 
         for key in data[metric]:
@@ -209,14 +208,6 @@ class Repo:
         return output_doc
 
 
-# Repos to collect metrics from.
-# The first variable is a human readable name, the second needs to match the
-# url extension for the repo exactly.
-repos = {
-    "<REPO-NAME>": "<REPO-URL-EXTENSION>",
-}
-
-
 def get_yesterdays_date():
     ''' Method to get yesterday's date
 
@@ -228,27 +219,3 @@ def get_yesterdays_date():
     today = datetime.date.today()
     yesterdays_date = str(today - datetime.timedelta(days=1))
     return yesterdays_date
-
-
-def main(mytimer: func.TimerRequest):
-    utc_timestamp = (
-        datetime.datetime.utcnow()
-        .replace(tzinfo=datetime.timezone.utc)
-        .isoformat()
-    )
-
-    if mytimer.past_due:
-        logging.info("The timer is past due!")
-
-    logging.info("Python timer trigger function ran at %s", utc_timestamp)
-    cosmos_db = Database(
-                os.getenv("CosmosDBConnectionString"),
-                "<YOUR-DATABASE-NAME>",
-                "<YOUR-CONTAINER-NAME>"
-                )
-
-    for name, url in repos.items():
-        repo = Repo("<REPO-OWNER>", name, url, os.getenv("GithubApiKey"))
-        output = repo.metrics()
-        cosmos_db.upload(output)
-        del repo
