@@ -40,8 +40,8 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 ## Prerequisites
 
-1. Create and Azure Account if you don't have one
-1. Have VS Code installed  
+1. Azure account - [Sign up for free](https://azure.microsoft.com/en-us/free)
+1. [VS Code installed](https://code.visualstudio.com)
 1. Have [Azure Functions](vscode:extension/ms-azuretools.vscode-azurefunctions) and [Python](vscode:extension/ms-python.python) extensions for VS Code installed
 
 ## Running the Code
