@@ -118,9 +118,9 @@ You can use the Data Explorer in the Azure portal to create a database and conta
 
 1. Open the repo folder in VS Code
 1. When prompted select **Yes**  
-    ![](./media/AzureFunctionDetected.png)
+    ![Azure Function detected prompt](./media/AzureFunctionDetected.png)
 1. Select **python** from the drop down menu
-    ![](media/LangaugeSelection.png)
+    ![Language list dropdown](media/LangaugeSelection.png)
 1. Select a local installation of Python 3.8 to create a virtual environment with.
 1. Create a file called *local.settings.json*
 1. Copy and paste the code below into the file and save it.
