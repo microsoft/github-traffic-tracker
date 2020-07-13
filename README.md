@@ -54,9 +54,8 @@ Go to the [Azure portal](https://portal.azure.com/) to create an Azure Cosmos DB
 
 ![The Azure portal Databases pane](https://docs.microsoft.com/en-us/azure/cosmos-db/media/create-cosmosdb-resources-portal/find-nosql-cosmosdb-marketplace.png)
 
-
 1. Select **Add**.
-1. On the **Create Azure Cosmos DB Account** page, enter the basic settings for the new Azure Cosmos account. 
+1. On the **Create Azure Cosmos DB Account** page, enter the basic settings for the new Azure Cosmos account.
 
     |Setting|Value|Description |
     |---|---|---|
@@ -85,18 +84,18 @@ Go to the [Azure portal](https://portal.azure.com/) to create an Azure Cosmos DB
 
     ![The Azure Cosmos DB account page](https://docs.microsoft.com/en-us/azure/cosmos-db/media/create-cosmosdb-resources-portal/azure-cosmos-db-account-quickstart-pane.png)
 
-#### Add a database and a container 
+#### Add a database and a container
 
-You can use the Data Explorer in the Azure portal to create a database and container. 
+You can use the Data Explorer in the Azure portal to create a database and container.
 
-1.  Select **Data Explorer** from the left navigation on your Azure Cosmos DB account page, and then select **New Container**. 
-    
+1. Select **Data Explorer** from the left navigation on your Azure Cosmos DB account page, and then select **New Container**.
+
     You may need to scroll right to see the **Add Container** window.
-    
+
     ![The Azure portal Data Explorer, Add Container pane](https://docs.microsoft.com/en-us/azure/cosmos-db/media/create-sql-api-dotnet/azure-cosmosdb-data-explorer-dotnet.png)
-    
-1.  In the **Add container** pane, enter the settings for the new container.
-    
+
+1. In the **Add container** pane, enter the settings for the new container.
+
     |Setting|Suggested value|Description
     |---|---|---|
     |**Database ID**|GitHubTraffic|Enter *GitHubTraffic* as the name for the new database. Database names must contain from 1 through 255 characters, and they cannot contain `/, \\, #, ?`, or a trailing space. Check the **Provision database throughput** option, it allows you to share the throughput provisioned to the database across all the containers within the database. This option also helps with cost savings. |
@@ -104,27 +103,28 @@ You can use the Data Explorer in the Azure portal to create a database and conta
     |**Container ID**|Metrics|Enter *Metrics* as the name for your new container. Container IDs have the same character requirements as database names.|
     |**Partition key**| /repo| The sample described in this article uses */repo* as the partition key.|
 
-    
     Don't add **Unique keys** for this example. Unique keys let you add a layer of data integrity to the database by ensuring the uniqueness of one or more values per partition key. For more information, see [Unique keys in Azure Cosmos DB](unique-keys.md).
-    
-1.  Select **OK**. The Data Explorer displays the new database and the container that you created.
 
-1.  Next, select **Keys** from the left navigation.
+<!-- 
+1.  Select **OK**. The Data Explorer displays the new database and the container that you created. -->
 
-1.  Copy the *Primary Connection String* you'll need this in the next section.
+1. Next, select **Keys** from the left navigation.
+
+1. Copy the *Primary Connection String* you'll need this in the next section.
 
 > *For a more detailed setup follow [this tutorial](https://docs.microsoft.com/en-us/azure/cosmos-db/create-cosmosdb-resources-portal)*  
 
 #### Initialize Function in VS Code
 
-1.  Open the repo folder in VS Code
-1.  When prompted select **Yes**  
+1. Open the repo folder in VS Code
+1. When prompted select **Yes**  
     ![](./media/AzureFunctionDetected.png)
-1.  Select **python** from the drop down menu
+1. Select **python** from the drop down menu
     ![](media/LangaugeSelection.png)
-1.  Select a local installation of Python 3.8 to create a virtual environment with.
-1.  Create a file called *local.settings.json*
-1.  Copy and paste the code below into the file and save it.
+1. Select a local installation of Python 3.8 to create a virtual environment with.
+1. Create a file called *local.settings.json*
+1. Copy and paste the code below into the file and save it.
+
     ```json
     {
     "IsEncrypted": false,
@@ -136,21 +136,26 @@ You can use the Data Explorer in the Azure portal to create a database and conta
         }
     }
     ```
-1.  Follow the steps in [this tutorial](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) to generate you GitHub api key. 
-1.  Copy and paste the key into *local.settings.json* in the *GithubApiKey* field
-1.  Paste the Primary Connection String from the pervious section in the *CosmosDBConnectionString*.
-1.  Save the file
+
+1. Follow the steps in [this tutorial](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) to generate you GitHub api key. 
+1. Copy and paste the key into *local.settings.json* in the *GithubApiKey* field
+1. Paste the Primary Connection String from the pervious section in the *CosmosDBConnectionString*.
+1. Save the file
 
 Next you'll need to update the variable in the code.
-1.  Open *traffic_tracker.py*
-1.  Fill the *repos* dict with the repos you'd like to track
+
+1. Open *traffic_tracker.py*
+1. Fill the *repos* dict with the repos you'd like to track
+
     ```python
     repos = {
     "<REPO-NAME>": "<REPO-URL-EXTENSION>",
     }
     ```
+
     >*Note: the url extension must match the url extension for GitHub. For example the extension for this repo is **github-traffic-tracker**.
-1.  Add the database and container names when initializing CosmosDB.
+1. Add the database and container names when initializing CosmosDB.
+
     ```python
     cosmos_db = Database(
                 os.getenv("CosmosDBConnectionString"),
@@ -158,13 +163,15 @@ Next you'll need to update the variable in the code.
                 "<YOUR-CONTAINER-NAME>"
                 )
     ```
+
     >*If you used the name given in the example they are **GitHubTraffic** and **Metrics**.*
-1.  Add the repo owner
+1. Add the repo owner
+
     ```python
     repo = Repo("<USER-OR-ORG-OWNER>", name, url, os.getenv("GithubApiKey"))
     ```
-    >*This is likely your username or the name of the organization that this repo belongs to.*
 
+    >*This is likely your username or the name of the organization that this repo belongs to.*
 
 #### Deploy Azure Function
 
@@ -191,8 +198,6 @@ A function app requires an Azure Storage account for data and a [hosting plan](/
 1. Once deployment is complete, the Azure Functions extension displays a message with buttons for three additional actions:
 
     ![Message indicating successful deployment with additional actions](https://docs.microsoft.com/en-us/azure/developer/python/media/tutorial-vs-code-serverless-python/azure-functions-deployment-success-with-additional-actions.png)
-
-
 
 #### Sync local settings to Azure
 
