@@ -105,9 +105,6 @@ You can use the Data Explorer in the Azure portal to create a database and conta
 
     Don't add **Unique keys** for this example. Unique keys let you add a layer of data integrity to the database by ensuring the uniqueness of one or more values per partition key. For more information, see [Unique keys in Azure Cosmos DB](unique-keys.md).
 
-<!-- 
-1.  Select **OK**. The Data Explorer displays the new database and the container that you created. -->
-
 1. Next, select **Keys** from the left navigation.
 
 1. Copy the *Primary Connection String* you'll need this in the next section.
