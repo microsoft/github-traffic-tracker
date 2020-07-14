@@ -5,8 +5,8 @@ languages:
 products:
 - azure functions
 - azure cosmos db
-description: "Add 150 character max description"
-urlFragment: "update-this-to-unique-url-stub"
+description: "Azure function to capture GitHub traffic in Cosmos DB"
+urlFragment: "github-traffic-tracker"
 ---
 
 # GitHub Traffic Tracking
@@ -92,7 +92,7 @@ You can use the Data Explorer in the Azure portal to create a database and conta
 
     You may need to scroll right to see the **Add Container** window.
 
-    ![The Azure portal Data Explorer, Add Container pane](https://docs.microsoft.com/en-us/azure/cosmos-db/media/create-sql-api-dotnet/azure-cosmosdb-data-explorer-dotnet.png)
+    ![The Azure portal Data Explorer, Add Container pane](./media/container_cosmos.png)
 
 1. In the **Add container** pane, enter the settings for the new container.
 
@@ -213,10 +213,10 @@ Your code will run automatically at 1 am UTC each day and capture the data from 
     > The code will now run once a minute.
 1. Edit the *"schedule"* entry back to _"0 0 1 * * *"_ and save the file
 
-## Key concepts
+<!-- ## Key concepts
 
 TODO:
-Provide users with more context on the tools and services used in the sample. Explain some of the code that is being used and how services interact with each other.
+Provide users with more context on the tools and services used in the sample. Explain some of the code that is being used and how services interact with each other. -->
 
 ## Contributing
 
