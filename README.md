@@ -144,7 +144,7 @@ You can use the Data Explorer in the Azure portal to create a database and conta
 
 Next you'll need to update the variable in the code.
 
-1. Open *traffic_tracker.py*
+1. Open *__init__.py*
 1. Fill the *repos* dict with the repos you'd like to track
 
     ```python
