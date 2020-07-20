@@ -14,6 +14,10 @@ repos = {
 
 
 def main(mytimer: func.TimerRequest):
+    # Uncomment this to load the repos from GitHub each time
+    # org = Org("<USER-OR-ORG-OWNER>", os.getenv("GithubApiKey"))
+    # repos = org.repos()
+
     utc_timestamp = (
         datetime.datetime.utcnow()
         .replace(tzinfo=datetime.timezone.utc)
