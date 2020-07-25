@@ -158,8 +158,8 @@ Next you'll need to update the variable in the code.
         ```python
         def main(mytimer: func.TimerRequest):
             # Uncomment this to load the repos from GitHub each time
-            org = UserOrOrg("<USER-OR-ORG>", os.getenv("GithubApiKey"))
-            repos = org.repos()
+            user_or_org = UserOrOrg("<USER-OR-ORG>", os.getenv("GithubApiKey"))
+            repos = user_or_org.repos()
         ```
 
         Replace `<USER-OR-ORG>` with the GitHub user name or organization name.
