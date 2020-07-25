@@ -3,7 +3,7 @@ import datetime
 import os
 import azure.functions as func
 
-from .traffic_tracker import Database, Repo
+from .traffic_tracker import Database, Repo, UserOrOrg
 
 # Repos to collect metrics from.
 # The first variable is a human readable name, the second needs to match the
