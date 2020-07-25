@@ -162,7 +162,7 @@ Next you'll need to update the variable in the code.
             repos = org.repos()
         ```
 
-        Replace `<USER-OR-ORG-OWNER>` with the GitHub user name or organization name.
+        Replace `<REPO-OWNER>` with the GitHub user name or organization name.
 
         This will retrieve all the repositories for the user, and gather traffic data for all of these.
 

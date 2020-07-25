@@ -7,7 +7,7 @@ import uuid
 import azure.functions as func
 from azure.cosmos import CosmosClient
 
-API_URL_BASE = "https://api.github.com"
+_API_URL_BASE = "https://api.github.com"
 
 class Database:
     ''' Class used to handle Cosmos DB
@@ -47,7 +47,7 @@ class Database:
         '''
         self._container_client.upsert_item(data)
 
-class Org:
+class UserOrOrg:
     '''This call represents a GitHub org
     '''
     def __init__(self, owner, api_token):
@@ -63,7 +63,7 @@ class Org:
         per_page = 100
         while True:
             params = { "per_page" : per_page, "page" : page}
-            response = requests.get(API_URL_BASE + self._userrepos, headers=self._headers, params=params)
+            response = requests.get(_API_URL_BASE + self._userrepos, headers=self._headers, params=params)
             if response.status_code == 200:
                 repos = json.loads(response.content.decode("utf-8"))
                 for r in repos:
@@ -142,7 +142,7 @@ class Repo:
 
     def _get_data(self, url, metric):
         # returns json from the GitHub API
-        response = requests.get(API_URL_BASE + self._v3 + url + metric,
+        response = requests.get(_API_URL_BASE + self._v3 + url + metric,
                                 headers=self._headers)
         if response.status_code == 200:
             return json.loads(response.content.decode("utf-8"))
@@ -202,7 +202,7 @@ class Repo:
     def _query(self):
         # returns dict with total forks, watchers, stars, and pull requests
         response = requests.post(
-            API_URL_BASE + self._V4,
+            _API_URL_BASE + self._V4,
             headers=self._headers,
             json={"query": self._v4_query()}
         )
