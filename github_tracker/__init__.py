@@ -31,7 +31,7 @@ def main(mytimer: func.TimerRequest):
                 )
 
     # Uncomment this to load the repos from GitHub each time
-    # org = Org("<USER-OR-ORG-OWNER>", os.getenv("GithubApiKey"))
+    # org = Org("<USER-OR-ORG>", os.getenv("GithubApiKey"))
     # repos = org.repos()
     
     for name, url in repos.items():

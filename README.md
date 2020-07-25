@@ -158,11 +158,11 @@ Next you'll need to update the variable in the code.
         ```python
         def main(mytimer: func.TimerRequest):
             # Uncomment this to load the repos from GitHub each time
-            org = Org("<REPO-OWNER>", os.getenv("GithubApiKey"))
+            org = Org("<USER-OR-ORG>", os.getenv("GithubApiKey"))
             repos = org.repos()
         ```
 
-        Replace `<REPO-OWNER>` with the GitHub user name or organization name.
+        Replace `<USER-OR-ORG>` with the GitHub user name or organization name.
 
         This will retrieve all the repositories for the user, and gather traffic data for all of these.
 
