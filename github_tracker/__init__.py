@@ -3,7 +3,7 @@ import datetime
 import os
 import azure.functions as func
 
-from .traffic_tracker import Database, Repo
+from .traffic_tracker import Database, Repo, UserOrOrg
 
 # Repos to collect metrics from.
 # The first variable is a human readable name, the second needs to match the
@@ -30,6 +30,10 @@ def main(mytimer: func.TimerRequest):
                 "<YOUR-CONTAINER-NAME>"
                 )
 
+    # Uncomment this to load the repos from GitHub each time
+    # user_or_org = UserOrOrg("<USER-OR-ORG>", os.getenv("GithubApiKey"))
+    # repos = user_or_org.repos()
+    
     for name, url in repos.items():
         repo = Repo("<REPO-OWNER>", name, url, os.getenv("GithubApiKey"))
         output = repo.metrics()

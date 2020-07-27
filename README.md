@@ -142,15 +142,32 @@ You can use the Data Explorer in the Azure portal to create a database and conta
 Next you'll need to update the variable in the code.
 
 1. Open *__init__.py*
-1. Fill the *repos* dict with the repos you'd like to track
+1. The list of repositories can be set manually, or data can be retrieved for all repos for the user or organization.
+    1. For a manual list of repositories, fill the *repos* dict with the repos you'd like to track
 
-    ```python
-    repos = {
-    "<REPO-NAME>": "<REPO-URL-EXTENSION>",
-    }
-    ```
+        ```python
+        repos = {
+        "<REPO-NAME>": "<REPO-URL-EXTENSION>",
+        }
+        ```
 
-    >*Note: the url extension must match the url extension for GitHub. For example the extension for this repo is **github-traffic-tracker**.
+        > **Note:** the url extension must match the url extension for GitHub. For example the extension for this repo is **github-traffic-tracker**.
+
+    1. For all repos for a user or organization, delete the declaration of the `repos` dictionary, and uncomment the lines in the `main` function that retrieve the orgs.
+
+        ```python
+        def main(mytimer: func.TimerRequest):
+            # Uncomment this to load the repos from GitHub each time
+            user_or_org = UserOrOrg("<USER-OR-ORG>", os.getenv("GithubApiKey"))
+            repos = user_or_org.repos()
+        ```
+
+        Replace `<USER-OR-ORG>` with the GitHub user name or organization name.
+
+        This will retrieve all the repositories for the user, and gather traffic data for all of these.
+
+        > **Note:** by doing this you won't be able to set a human-readable name for the repos in the cosmos database, they will all use the repo name.
+
 1. Add the database and container names when initializing CosmosDB.
 
     ```python
@@ -165,7 +182,7 @@ Next you'll need to update the variable in the code.
 1. Add the repo owner
 
     ```python
-    repo = Repo("<USER-OR-ORG-OWNER>", name, url, os.getenv("GithubApiKey"))
+    repo = Repo("<REPO-OWNER>", name, url, os.getenv("GithubApiKey"))
     ```
 
     >*This is likely your username or the name of the organization that this repo belongs to.*

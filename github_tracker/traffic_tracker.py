@@ -7,6 +7,7 @@ import uuid
 import azure.functions as func
 from azure.cosmos import CosmosClient
 
+_API_URL_BASE = "https://api.github.com"
 
 class Database:
     ''' Class used to handle Cosmos DB
@@ -46,6 +47,41 @@ class Database:
         '''
         self._container_client.upsert_item(data)
 
+class UserOrOrg:
+    '''This call represents a GitHub org
+    '''
+    def __init__(self, owner, api_token):
+        self._owner = owner
+        self._headers = {"Authorization": "Bearer {}".format(api_token)}
+        self._userrepos = "/users/{}/repos".format(owner)
+
+    def repos(self):
+        '''Returns a list of all repos for an org
+        '''
+        results = dict()
+        page = 1
+        per_page = 100
+        while True:
+            params = { "per_page" : per_page, "page" : page}
+            response = requests.get(_API_URL_BASE + self._userrepos, headers=self._headers, params=params)
+            if response.status_code == 200:
+                repos = json.loads(response.content.decode("utf-8"))
+                for r in repos:
+                    results.update({r["name"]:r["name"]})
+
+                if len(repos) < per_page:
+                    break
+
+                page += 1
+
+            elif response.status_code == 404 or 403 or 400:
+                logging.info("GitHub failed to connect, check that the owner and repo url are set correctly")
+                logging.warning("GitHub connection error " +
+                                str(response.status_code))
+                
+                return dict()
+
+        return results
 
 class Repo:
     ''' This class represents the repo/metrics
@@ -70,7 +106,6 @@ class Repo:
         Returns a dict of the views, clones, watchers, stars, forks, and pull
         requests for the repository
     '''
-    _API_URL_BASE = "https://api.github.com"
     _V4 = "/graphql"
 
     def __init__(self, owner, name, url, api_token):
@@ -107,7 +142,7 @@ class Repo:
 
     def _get_data(self, url, metric):
         # returns json from the GitHub API
-        response = requests.get(self._API_URL_BASE + self._v3 + url + metric,
+        response = requests.get(_API_URL_BASE + self._v3 + url + metric,
                                 headers=self._headers)
         if response.status_code == 200:
             return json.loads(response.content.decode("utf-8"))
@@ -167,7 +202,7 @@ class Repo:
     def _query(self):
         # returns dict with total forks, watchers, stars, and pull requests
         response = requests.post(
-            self._API_URL_BASE + self._V4,
+            _API_URL_BASE + self._V4,
             headers=self._headers,
             json={"query": self._v4_query()}
         )
